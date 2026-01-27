@@ -31,4 +31,26 @@ class LLMTestResponse(BaseModel):
     model: str
     usage: LLMUsageOut | None = None
 
+
+class ChatRequest(BaseModel):
+    user_id: str
+    query: str = Field(min_length=1)
+    history: list[LLMMessageIn] = Field(default_factory=list)
+    user_metadata: dict[str, str] | None = None
+
+
+class AgentOutputOut(BaseModel):
+    summary: str
+    key_points: list[str]
+    red_flags: list[str]
+    uncertainties: list[str]
+    evidence_links: list[str]
+    draft_response_text: str
+
+
+class ChatResponse(BaseModel):
+    trace_id: str
+    response_text: str
+    agents: dict[str, AgentOutputOut]
+
 #this is a smoke test endpoint to confirm if my llm api base url works, my api key works and my routing works from the role to model andthe request and response format is corect

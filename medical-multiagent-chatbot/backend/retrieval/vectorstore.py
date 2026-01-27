@@ -17,7 +17,7 @@ class VectorRecord:
 
 
 class ChromaVectorStore:
-    def __init__(self, path: str, collection_name: str = "kb") -> None:
+    def __init__(self, path: str, collection_name: str = "kb_store") -> None:
         self._client = chromadb.PersistentClient(path=path)
         self._collection = self._client.get_or_create_collection(
             name=collection_name,

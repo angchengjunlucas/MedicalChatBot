@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 
 from backend.api.routes_chat import router as chat_router
+from backend.api.routes_kb import router as kb_router
 from backend.api.routes_pubmed import router as pubmed_router
+from backend.api.routes_rag import router as rag_router
 
 
 def create_app() -> FastAPI:
@@ -12,7 +14,9 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     app.include_router(chat_router)
+    app.include_router(kb_router)
     app.include_router(pubmed_router)
+    app.include_router(rag_router)
 
     return app
 

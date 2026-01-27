@@ -103,3 +103,5 @@ async def ingest_documents(
 def _normalize_text(text: str) -> str:
     lines = [line.strip() for line in text.splitlines()]
     return "\n".join([line for line in lines if line])
+
+# it take documents --> chunks --> embeddings --> stored in vector database

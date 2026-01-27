@@ -19,6 +19,7 @@ class Settings:
     vector_db_type: str
     chroma_path: str
     qdrant_url: str
+    embedding_model: str
 
 
 @lru_cache
@@ -36,4 +37,5 @@ def get_settings() -> Settings:
         vector_db_type=getenv("VECTOR_DB_TYPE", "chroma"),
         chroma_path=getenv("CHROMA_PATH", "./data/chroma"),
         qdrant_url=getenv("QDRANT_URL", ""),
+        embedding_model=getenv("EMBEDDING_MODEL", ""),
     )
