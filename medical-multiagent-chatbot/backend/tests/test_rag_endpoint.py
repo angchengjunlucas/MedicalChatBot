@@ -46,7 +46,7 @@ async def test_rag_test_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
         def __init__(self, *args, **kwargs) -> None:
             pass
 
-        async def search_and_summary(self, query: str, retmax: int = 5):
+        async def search_and_summary(self, query: str, retmax: int = 5, **kwargs):
             return []
 
     monkeypatch.setattr("backend.api.routes_rag.get_settings", lambda: FakeSettings())
@@ -61,5 +61,6 @@ async def test_rag_test_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
     assert resp.status_code == 200
     payload = resp.json()
     assert payload["query"] == "heart failure"
+    assert "rewritten_query" in payload
 
 # ensure the wiring works without talking to real external systems first

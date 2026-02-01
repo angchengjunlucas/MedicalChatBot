@@ -29,6 +29,7 @@ def init_db(db_url: str) -> None:
                 query TEXT,
                 created_at TEXT,
                 response_text TEXT,
+                response_detail TEXT,
                 context_meta TEXT,
                 agent_outputs TEXT,
                 safety_flags TEXT,
@@ -36,6 +37,16 @@ def init_db(db_url: str) -> None:
             )
             """
         )
+        _ensure_column(conn, "traces", "response_detail", "TEXT")
         conn.commit()
     finally:
         conn.close()
+
+
+def _ensure_column(conn: sqlite3.Connection, table: str, column: str, column_type: str) -> None:
+    cur = conn.execute(f"PRAGMA table_info({table})")
+    existing = {row[1] for row in cur.fetchall()}
+    if column not in existing:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_type}")
+
+#this sets up a local SQlite database table to store my chatlogs / traces

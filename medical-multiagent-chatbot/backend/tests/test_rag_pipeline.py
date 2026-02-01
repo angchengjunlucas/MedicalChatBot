@@ -14,8 +14,11 @@ async def test_rag_pipeline_returns_context_bundle() -> None:
                 {"records": [VectorRecord(doc_id="d", chunk_id="c", text="t", metadata={}, score=0.9)]},
             )()
 
+        async def retrieve_hybrid(self, query: str, top_k: int = 5):
+            return await self.retrieve(query, top_k=top_k)
+
     class FakePubMed:
-        async def search_and_summary(self, query: str, retmax: int = 5):
+        async def search_and_summary(self, query: str, retmax: int = 5, **kwargs):
             return []
 
     rag = RAGPipeline(kb_pipeline=FakeKB(None, None), pubmed_client=FakePubMed())

@@ -9,6 +9,11 @@ from os import getenv
 class Settings:
     llm_api_base: str
     llm_api_key: str
+    local_base_model: str
+    local_supervisor_adapter: str
+    local_cardiology_adapter: str
+    local_geriatrics_adapter: str
+    local_mental_adapter: str
     default_model: str
     supervisor_model: str
     cardiology_model: str
@@ -20,6 +25,7 @@ class Settings:
     chroma_path: str
     qdrant_url: str
     embedding_model: str
+    log_db_url: str
 
 
 @lru_cache
@@ -27,6 +33,11 @@ def get_settings() -> Settings:
     return Settings(
         llm_api_base=getenv("LLM_API_BASE", ""),
         llm_api_key=getenv("LLM_API_KEY", ""),
+        local_base_model=getenv("LOCAL_BASE_MODEL", ""),
+        local_supervisor_adapter=getenv("LOCAL_SUPERVISOR_ADAPTER", ""),
+        local_cardiology_adapter=getenv("LOCAL_CARDIOLOGY_ADAPTER", ""),
+        local_geriatrics_adapter=getenv("LOCAL_GERIATRICS_ADAPTER", ""),
+        local_mental_adapter=getenv("LOCAL_MENTAL_ADAPTER", ""),
         default_model=getenv("DEFAULT_MODEL", "gpt-4.1-mini"),
         supervisor_model=getenv("SUPERVISOR_MODEL", "gpt-4.1-mini"),
         cardiology_model=getenv("CARDIOLOGY_MODEL", "gpt-4.1-mini"),
@@ -38,4 +49,5 @@ def get_settings() -> Settings:
         chroma_path=getenv("CHROMA_PATH", "./data/chroma"),
         qdrant_url=getenv("QDRANT_URL", ""),
         embedding_model=getenv("EMBEDDING_MODEL", ""),
+        log_db_url=getenv("LOG_DB_URL", "sqlite:///./data/logs.db"),
     )

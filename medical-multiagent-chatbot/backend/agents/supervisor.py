@@ -41,13 +41,36 @@ class SupervisorAgent(BaseAgent):
             temperature=0.1,
             max_tokens=300,
         )
-        return self._parse_decision(resp.content)
+        decision = self._parse_decision(resp.content)
+        if decision is None:
+            repair_messages = messages + [
+                {"role": "assistant", "content": resp.content},
+                {"role": "user", "content": "Return VALID JSON ONLY. No extra text, no markdown."},
+            ]
+            resp2 = await self._router.generate(
+                role="supervisor",
+                messages=repair_messages,
+                temperature=0.0,
+                max_tokens=200,
+            )
+            decision = self._parse_decision(resp2.content)
+        return decision or SupervisorDecision(
+            specialists=["cardiology", "geriatrics", "mental"],
+            rationale="Failed to parse supervisor output; defaulting to all specialists.",
+            instructions={},
+        )
 
     @staticmethod
-    def _parse_decision(text: str) -> SupervisorDecision:
+    def _parse_decision(text: str) -> SupervisorDecision | None:
         try:
-            data = json.loads(text)
-            specialists = list(data.get("specialists", []))
+            data = json.loads(_extract_json(text))
+            raw_specialists = list(data.get("specialists", []))
+            allowed = {"cardiology", "geriatrics", "mental"}
+            specialists = [
+                str(item).strip().lower()
+                for item in raw_specialists
+                if str(item).strip().lower() in allowed
+            ]
             rationale = str(data.get("rationale", "")).strip()
             instructions = dict(data.get("instructions", {}))
             if not specialists:
@@ -58,8 +81,14 @@ class SupervisorAgent(BaseAgent):
                 instructions=instructions,
             )
         except Exception:
-            return SupervisorDecision(
-                specialists=["cardiology", "geriatrics", "mental"],
-                rationale="Failed to parse supervisor output; defaulting to all specialists.",
-                instructions={},
-            )
+            return None
+
+
+def _extract_json(text: str) -> str:
+    if "{" not in text:
+        return text
+    start = text.find("{")
+    end = text.rfind("}")
+    if end > start:
+        return text[start : end + 1]
+    return text

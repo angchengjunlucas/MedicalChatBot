@@ -21,6 +21,13 @@ class ModelRouter:
         temperature: float,
         max_tokens: int,
     ) -> LLMResponse:
+        if hasattr(self.provider, "generate_with_role"):
+            return await self.provider.generate_with_role(
+                role,
+                messages,
+                temperature,
+                max_tokens,
+            )
         model_id = self._resolve_model(role)
         return await self.provider.generate(model_id, messages, temperature, max_tokens)
 

@@ -15,9 +15,9 @@ def save_trace(db_url: str, record: TraceRecord) -> None:
         conn.execute(
             """
             INSERT INTO traces (
-                trace_id, user_id, query, created_at, response_text,
+                trace_id, user_id, query, created_at, response_text, response_detail,
                 context_meta, agent_outputs, safety_flags, token_usage
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 record.trace_id,
@@ -25,6 +25,7 @@ def save_trace(db_url: str, record: TraceRecord) -> None:
                 record.query,
                 record.created_at,
                 record.response_text,
+                record.response_detail,
                 json.dumps(record.context_meta),
                 json.dumps(record.agent_outputs),
                 json.dumps(record.safety_flags),
@@ -44,16 +45,18 @@ def get_trace(db_url: str, trace_id: str) -> TraceRecord | None:
         row = cur.fetchone()
         if not row:
             return None
+        response_detail = row[5] if len(row) > 5 else None
         return TraceRecord(
             trace_id=row[0],
             user_id=row[1],
             query=row[2],
             created_at=row[3],
             response_text=row[4],
-            context_meta=json.loads(row[5]),
-            agent_outputs=json.loads(row[6]),
-            safety_flags=json.loads(row[7]),
-            token_usage=json.loads(row[8]),
+            response_detail=response_detail,
+            context_meta=json.loads(row[6]),
+            agent_outputs=json.loads(row[7]),
+            safety_flags=json.loads(row[8]),
+            token_usage=json.loads(row[9]),
         )
     finally:
         conn.close()

@@ -14,9 +14,15 @@ async def test_chat_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
         chroma_path = "/tmp/chroma"
         llm_api_base = "http://fake"
         llm_api_key = "fake"
+        local_base_model = ""
+        local_supervisor_adapter = ""
+        local_cardiology_adapter = ""
+        local_geriatrics_adapter = ""
+        local_mental_adapter = ""
         embedding_model = "fake-embed"
         pubmed_email = "test@example.com"
         pubmed_tool_name = "test-tool"
+        log_db_url = "sqlite:///./data/test.db"
         default_model = "fake"
         supervisor_model = "fake"
         cardiology_model = "fake"
@@ -34,6 +40,9 @@ async def test_chat_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
                 "Result",
                 (),
                 {
+                    "final_text": "d",
+                    "full_text": "full",
+                    "context_meta": {"rewritten_query": None, "kb_count": 0, "pubmed_count": 0},
                     "outputs": {
                         "cardiology": AgentOutput(
                             summary="s",
@@ -54,6 +63,8 @@ async def test_chat_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("backend.api.routes_chat.KBRetrievalPipeline", lambda *a, **k: object())
     monkeypatch.setattr("backend.api.routes_chat.PubMedClient", lambda *a, **k: object())
     monkeypatch.setattr("backend.api.routes_chat.RAGPipeline", lambda *a, **k: object())
+    monkeypatch.setattr("backend.api.routes_chat.init_db", lambda *a, **k: None)
+    monkeypatch.setattr("backend.api.routes_chat.save_trace", lambda *a, **k: None)
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -65,5 +76,6 @@ async def test_chat_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:
     assert resp.status_code == 200
     payload = resp.json()
     assert payload["response_text"] == "d"
+    assert payload["response_detail"] == "full"
 
 #ensure that a final response text is actually given back without real RAG and the agents

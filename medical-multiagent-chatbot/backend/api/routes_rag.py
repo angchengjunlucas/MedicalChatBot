@@ -38,6 +38,7 @@ async def rag_test(q: str = Query(..., min_length=2), top_k: int = 3, pubmed_k: 
 
     return {
         "query": bundle.query,
+        "rewritten_query": bundle.rewritten_query,
         "kb_passages": [r.__dict__ for r in bundle.kb_passages],
         "pubmed_refs": [p.__dict__ for p in bundle.pubmed_refs],
     }

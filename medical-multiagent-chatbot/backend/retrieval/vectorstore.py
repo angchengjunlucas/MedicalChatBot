@@ -52,7 +52,7 @@ class ChromaVectorStore:
             query_embeddings=[query_embedding],
             n_results=top_k,
             where=where,
-            include=["documents", "metadatas", "distances", "ids"],
+            include=["documents", "metadatas", "distances"],
         )
         return self._to_records(result)
 

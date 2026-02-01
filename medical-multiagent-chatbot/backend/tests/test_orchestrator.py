@@ -22,5 +22,7 @@ async def test_orchestrator_runs_specialists() -> None:
     result = await orch.run("q")
 
     assert "cardiology" in result.outputs
+    assert result.final_text
+    assert "kb_count" in result.context_meta
 
 # checks if the orchestrators call the specialist agents that the supervisor selects

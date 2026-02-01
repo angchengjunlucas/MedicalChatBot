@@ -15,6 +15,7 @@ class AgentOutput:
     uncertainties: list[str]
     evidence_links: list[str]
     draft_response_text: str
+    token_usage: dict[str, int] | None = None
 
 
 class BaseAgent:
@@ -32,6 +33,13 @@ class BaseAgent:
         ]
 
     def parse_response(self, response: LLMResponse) -> AgentOutput:
+        usage = None
+        if response.usage:
+            usage = {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens,
+            }
         return AgentOutput(
             summary=response.content.strip(),
             key_points=[],
@@ -39,6 +47,7 @@ class BaseAgent:
             uncertainties=[],
             evidence_links=[],
             draft_response_text=response.content.strip(),
+            token_usage=usage,
         )
 
     def _format_context(self, context: ContextBundle) -> str:
@@ -46,10 +55,25 @@ class BaseAgent:
             f"[KB:{rec.doc_id}:{rec.chunk_id}] {rec.text}" for rec in context.kb_passages
         ]
         pm_lines = [
-            f"[PMID:{ref.pmid}] {ref.title} ({ref.journal}, {ref.year})"
+            _format_pubmed(ref)
             for ref in context.pubmed_refs
         ]
         return "\n".join(kb_lines + pm_lines) if (kb_lines or pm_lines) else "No context."
+
+    def _evidence_ids(self, context: ContextBundle) -> list[str]:
+        ids: list[str] = []
+        for rec in context.kb_passages:
+            ids.append(f"KB:{rec.doc_id}:{rec.chunk_id}")
+        for ref in context.pubmed_refs:
+            ids.append(f"PMID:{ref.pmid}")
+        return ids
+
+
+def _format_pubmed(ref) -> str:
+    base = f"[PMID:{ref.pmid}] {ref.title} ({ref.journal}, {ref.year})"
+    if ref.abstract:
+        return f"{base}\nAbstract: {ref.abstract}"
+    return base
 
 """
 It standardizes how an agent turn question and retrieved context into LLM Messages

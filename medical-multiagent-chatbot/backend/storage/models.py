@@ -11,6 +11,7 @@ class TraceRecord:
     query: str
     created_at: str
     response_text: str
+    response_detail: str | None
     context_meta: dict[str, Any]
     agent_outputs: dict[str, Any]
     safety_flags: list[str]
